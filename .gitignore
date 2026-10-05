@@ -1,0 +1,18 @@
+# secrets
+.env
+
+# runtime data: SQLite, Chromium profile, Yandex dumps
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

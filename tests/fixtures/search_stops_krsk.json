@@ -1,0 +1,153 @@
+{
+ "stack": [
+  {
+   "results": {
+    "items": [
+     {
+      "type": "business",
+      "title": "Студгородок",
+      "description": "Красноярск, улица Академика Киренского",
+      "coordinates": [
+       92.795747,
+       55.997413
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901344",
+      "id": "132188891041"
+     },
+     {
+      "type": "business",
+      "title": "Студгородок",
+      "description": "Красноярск, улица Академика Киренского",
+      "coordinates": [
+       92.796431,
+       55.998099
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901345",
+      "id": "133652480762"
+     },
+     {
+      "type": "business",
+      "title": "Гастроном",
+      "description": "ул. Академика Киренского, 13Д",
+      "coordinates": [
+       92.791213,
+       55.996315
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901343",
+      "id": "202524629676"
+     },
+     {
+      "type": "business",
+      "title": "Гастроном",
+      "description": "Красноярск, улица Академика Киренского",
+      "coordinates": [
+       92.789795,
+       55.996357
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901342",
+      "id": "169347044305"
+     },
+     {
+      "type": "business",
+      "title": "Поликлиника",
+      "description": "Красноярск, улица Академика Киренского",
+      "coordinates": [
+       92.800573,
+       56.001413
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901346",
+      "id": "16875162040"
+     },
+     {
+      "type": "business",
+      "title": "Поликлиника",
+      "description": "Красноярск, улица Академика Киренского",
+      "coordinates": [
+       92.800172,
+       56.001368
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901347",
+      "id": "123998611510"
+     },
+     {
+      "type": "business",
+      "title": "Станция юннатов",
+      "description": "ул. Академика Киренского, 64",
+      "coordinates": [
+       92.801998,
+       56.004504
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901348",
+      "id": "138830363069"
+     },
+     {
+      "type": "business",
+      "title": "Станция юннатов",
+      "description": "Красноярск, улица Академика Киренского",
+      "coordinates": [
+       92.8015,
+       56.005789
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901349",
+      "id": "48534007669"
+     },
+     {
+      "type": "business",
+      "title": "Лесная",
+      "description": "Красноярск, улица Академика Киренского",
+      "coordinates": [
+       92.768128,
+       55.99404
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901336",
+      "id": "57890474183"
+     },
+     {
+      "type": "business",
+      "title": "Кинотеатр Ударник",
+      "description": "микрорайон Николаевка, Советская ул., 98",
+      "coordinates": [
+       92.801513,
+       56.009542
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901350",
+      "id": "23861041130"
+     },
+     {
+      "type": "business",
+      "title": "Улица Луначарского",
+      "description": "Красноярск, Николаевский проспект",
+      "coordinates": [
+       92.802088,
+       56.013772
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901381",
+      "id": "130223422763"
+     },
+     {
+      "type": "business",
+      "title": "Краевая детская больница",
+      "description": "Красноярск, улица Академика Киренского",
+      "coordinates": [
+       92.779703,
+       55.994831
+      ],
+      "uri": "ymapsbm1://transit/stop?id=stop__9901341",
+      "id": "150387661339"
+     },
+     {
+      "type": "business",
+      "title": "Экопарк Гремячая грива",
+      "description": "Красноярск, Свободный проспект",
+      "coordinates": [
+       92.767977,
+       56.003649
+      ],
+      "uri": "ymapsbm1://transit/stop?id=3290664457",
+      "id": "242638808224"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,642 @@
+{
+ "data": {
+  "id": "stop__9901344",
+  "coordinates": [
+   92.795747321,
+   55.997413238
+  ],
+  "currentTime": 1791185222203,
+  "tzOffset": 25200,
+  "type": "urban",
+  "region": {
+   "id": 62,
+   "type": 6,
+   "capitalId": 0,
+   "hierarchy": [
+    225,
+    11309,
+    62
+   ],
+   "seoname": "krasnoyarsk",
+   "bounds": [
+    [
+     92.581636,
+     55.89935344442806
+    ],
+    [
+     93.123526,
+     56.12141344442806
+    ]
+   ],
+   "longitude": 92.852581,
+   "latitude": 56.010543,
+   "zoom": 12,
+   "names": {
+    "ablative": "",
+    "accusative": "Красноярск",
+    "dative": "Красноярску",
+    "directional": "",
+    "genitive": "Красноярска",
+    "instrumental": "Красноярском",
+    "locative": "",
+    "nominative": "Красноярск",
+    "preposition": "в",
+    "prepositional": "Красноярске"
+   }
+  },
+  "transports": [
+   {
+    "lineId": "2611970486",
+    "name": "63",
+    "Types": [
+     "bus"
+    ],
+    "type": "bus",
+    "threads": [
+     {
+      "threadId": "4162367639",
+      "noBoarding": false,
+      "EssentialStops": [
+       {
+        "id": "4133528506",
+        "name": "Академгородок – конечная",
+        "compositeName": {
+         "name": "Академгородок – конечная",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": true,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "stop__9901475",
+        "name": "Улица Светлова",
+        "compositeName": {
+         "name": "Улица Светлова",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": true
+        }
+       }
+      ],
+      "BriefSchedule": {
+       "Events": [],
+       "Frequencies": [
+        {
+         "text": "16 мин",
+         "value": 960,
+         "begin": {
+          "value": "1791166372",
+          "tzOffset": 25200,
+          "text": "09:12"
+         },
+         "end": {
+          "value": "1791193372",
+          "tzOffset": 25200,
+          "text": "16:42"
+         }
+        }
+       ]
+      }
+     }
+    ],
+    "uri": "ymapsbm1://transit/line?id=2611970486&ll=92.839564%2C56.027924&name=63&r=15000&type=bus",
+    "seoname": "63",
+    "description": ""
+   },
+   {
+    "lineId": "2611970554",
+    "name": "3",
+    "Types": [
+     "bus"
+    ],
+    "type": "bus",
+    "threads": [
+     {
+      "threadId": "5189728876",
+      "noBoarding": false,
+      "EssentialStops": [
+       {
+        "id": "4133528506",
+        "name": "Академгородок – конечная",
+        "compositeName": {
+         "name": "Академгородок – конечная",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": true,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "1543121505",
+        "name": "Автовокзал Восточный",
+        "compositeName": {
+         "name": "Автовокзал Восточный",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": true
+        }
+       }
+      ],
+      "BriefSchedule": {
+       "Events": [
+        {
+         "Estimated": {
+          "value": "1791185336",
+          "tzOffset": 25200,
+          "text": "14:28"
+         },
+         "vehicleId": "MKUKGT|116741330756"
+        }
+       ],
+       "Frequencies": [
+        {
+         "text": "11 мин",
+         "value": 660,
+         "begin": {
+          "value": "1791166478",
+          "tzOffset": 25200,
+          "text": "09:14"
+         },
+         "end": {
+          "value": "1791193478",
+          "tzOffset": 25200,
+          "text": "16:44"
+         }
+        }
+       ]
+      }
+     }
+    ],
+    "uri": "ymapsbm1://transit/line?id=2611970554&ll=92.871201%2C56.000975&name=3&r=12000&type=bus",
+    "seoname": "3",
+    "description": ""
+   },
+   {
+    "lineId": "2611970568",
+    "name": "38",
+    "Types": [
+     "bus"
+    ],
+    "type": "bus",
+    "threads": [
+     {
+      "threadId": "2611970631",
+      "noBoarding": false,
+      "EssentialStops": [
+       {
+        "id": "stop__9901328",
+        "name": "Дом учёных",
+        "compositeName": {
+         "name": "Дом учёных",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": true,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "4016947880",
+        "name": "Посёлок Таймыр – Конечная",
+        "compositeName": {
+         "name": "Посёлок Таймыр – Конечная",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": true
+        }
+       }
+      ],
+      "BriefSchedule": {
+       "Events": [
+        {
+         "Estimated": {
+          "value": "1791185325",
+          "tzOffset": 25200,
+          "text": "14:28"
+         },
+         "vehicleId": "MKUKGT|1175414100355"
+        }
+       ],
+       "Frequencies": [
+        {
+         "text": "11 мин",
+         "value": 660,
+         "begin": {
+          "value": "1791166348",
+          "tzOffset": 25200,
+          "text": "09:12"
+         },
+         "end": {
+          "value": "1791193348",
+          "tzOffset": 25200,
+          "text": "16:42"
+         }
+        }
+       ]
+      }
+     }
+    ],
+    "uri": "ymapsbm1://transit/line?id=2611970568&ll=92.726617%2C56.000975&name=38&r=6000&type=bus",
+    "seoname": "38",
+    "description": ""
+   },
+   {
+    "lineId": "2611970583",
+    "name": "83",
+    "Types": [
+     "bus"
+    ],
+    "type": "bus",
+    "threads": [
+     {
+      "threadId": "2611970709",
+      "noBoarding": false,
+      "EssentialStops": [
+       {
+        "id": "stop__9901328",
+        "name": "Дом учёных",
+        "compositeName": {
+         "name": "Дом учёных",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": true,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "3126930937",
+        "name": "Профилакторий завода КраМЗ",
+        "compositeName": {
+         "name": "Профилакторий завода КраМЗ",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": true
+        }
+       }
+      ],
+      "BriefSchedule": {
+       "Events": [],
+       "Frequencies": [
+        {
+         "text": "21 мин",
+         "value": 1260,
+         "begin": {
+          "value": "1791166348",
+          "tzOffset": 25200,
+          "text": "09:12"
+         },
+         "end": {
+          "value": "1791193348",
+          "tzOffset": 25200,
+          "text": "16:42"
+         }
+        }
+       ]
+      }
+     }
+    ],
+    "uri": "ymapsbm1://transit/line?id=2611970583&ll=92.823006%2C56.000975&name=83&r=12000&type=bus",
+    "seoname": "83",
+    "description": ""
+   },
+   {
+    "lineId": "2611970595",
+    "name": "2",
+    "Types": [
+     "bus"
+    ],
+    "type": "bus",
+    "threads": [
+     {
+      "threadId": "2611970670",
+      "noBoarding": false,
+      "EssentialStops": [
+       {
+        "id": "stop__9901328",
+        "name": "Дом учёных",
+        "compositeName": {
+         "name": "Дом учёных",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": true,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "1543121505",
+        "name": "Автовокзал Восточный",
+        "compositeName": {
+         "name": "Автовокзал Восточный",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": true
+        }
+       }
+      ],
+      "BriefSchedule": {
+       "Events": [
+        {
+         "Estimated": {
+          "value": "1791185609",
+          "tzOffset": 25200,
+          "text": "14:33"
+         },
+         "vehicleId": "MKUKGT|122285200633"
+        }
+       ],
+       "Frequencies": [
+        {
+         "text": "12 мин",
+         "value": 720,
+         "begin": {
+          "value": "1791166484",
+          "tzOffset": 25200,
+          "text": "09:14"
+         },
+         "end": {
+          "value": "1791193484",
+          "tzOffset": 25200,
+          "text": "16:44"
+         }
+        }
+       ]
+      }
+     }
+    ],
+    "uri": "ymapsbm1://transit/line?id=2611970595&ll=92.871201%2C56.000975&name=2&r=12000&type=bus",
+    "seoname": "2",
+    "description": ""
+   },
+   {
+    "lineId": "4249186169",
+    "name": "6",
+    "Types": [
+     "trolleybus"
+    ],
+    "type": "trolleybus",
+    "threads": [
+     {
+      "threadId": "4347408746",
+      "noBoarding": false,
+      "EssentialStops": [
+       {
+        "id": "stop__9901344",
+        "name": "Студгородок",
+        "compositeName": {
+         "name": "Студгородок",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": true,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "stop__10184993",
+        "name": "Микрорайон Утиный плёс",
+        "compositeName": {
+         "name": "Микрорайон Утиный плёс",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": true,
+         "important": false,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "stop__9901345",
+        "name": "Студгородок",
+        "compositeName": {
+         "name": "Студгородок",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": true
+        }
+       }
+      ],
+      "BriefSchedule": {
+       "Events": [],
+       "Frequencies": [
+        {
+         "text": "15 мин",
+         "value": 900,
+         "begin": {
+          "value": "1791165600",
+          "tzOffset": 25200,
+          "text": "09:00"
+         },
+         "end": {
+          "value": "1791190800",
+          "tzOffset": 25200,
+          "text": "16:00"
+         }
+        }
+       ]
+      }
+     },
+     {
+      "threadId": "6939872344",
+      "noBoarding": false,
+      "description": "в парк",
+      "EssentialStops": [
+       {
+        "id": "stop__9901344",
+        "name": "Студгородок",
+        "compositeName": {
+         "name": "Студгородок",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": true,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "stop__9901222",
+        "name": "Улица Перенсона",
+        "compositeName": {
+         "name": "Улица Перенсона",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": true
+        }
+       }
+      ],
+      "BriefSchedule": {
+       "Events": [
+        {
+         "Scheduled": {
+          "value": "1791211020",
+          "tzOffset": 25200,
+          "text": "21:37"
+         }
+        },
+        {
+         "Scheduled": {
+          "value": "1791212100",
+          "tzOffset": 25200,
+          "text": "21:55"
+         }
+        },
+        {
+         "Scheduled": {
+          "value": "1791213360",
+          "tzOffset": 25200,
+          "text": "22:16"
+         }
+        }
+       ],
+       "Frequencies": [],
+       "departureTime": "21:37"
+      }
+     },
+     {
+      "threadId": "6939874784",
+      "noBoarding": false,
+      "description": "в парк",
+      "EssentialStops": [
+       {
+        "id": "stop__9901344",
+        "name": "Студгородок",
+        "compositeName": {
+         "name": "Студгородок",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": true,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "stop__10184993",
+        "name": "Микрорайон Утиный плёс",
+        "compositeName": {
+         "name": "Микрорайон Утиный плёс",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": true,
+         "important": false,
+         "lastStop": false
+        }
+       },
+       {
+        "id": "stop__9901221",
+        "name": "Театр оперы и балета",
+        "compositeName": {
+         "name": "Театр оперы и балета",
+         "additionalName": ""
+        },
+        "info": {
+         "firstStop": false,
+         "intermediateTerminus": false,
+         "important": true,
+         "lastStop": true
+        }
+       }
+      ],
+      "BriefSchedule": {
+       "Events": [],
+       "Frequencies": []
+      }
+     }
+    ],
+    "uri": "ymapsbm1://transit/line?id=4249186169&ll=92.806492%2C55.974025&name=6&r=9000&type=trolleybus",
+    "seoname": "6",
+    "description": ""
+   }
+  ],
+  "features": {
+   "cooled": false,
+   "heated": false
+  },
+  "contours": [],
+  "name": "Студгородок",
+  "compositeName": {
+   "name": "Студгородок",
+   "additionalName": ""
+  },
+  "breadcrumbs": [
+   {
+    "name": "Карты",
+    "type": "root",
+    "url": "https://yandex.com/maps/"
+   },
+   {
+    "name": "Красноярск",
+    "type": "region",
+    "url": "https://yandex.com/maps/62/krasnoyarsk/",
+    "region": {
+     "center": [
+      92.852581,
+      56.010543
+     ],
+     "zoom": 12
+    }
+   },
+   {
+    "name": "Общественный транспорт",
+    "type": "masstransit-home",
+    "url": "https://yandex.com/maps/62/krasnoyarsk/transport/"
+   },
+   {
+    "name": "Студгородок",
+    "type": "search",
+    "url": "https://yandex.com/maps/62/krasnoyarsk/stops/stop__9901344/",
+    "currentPage": true
+   }
+  ]
+ }
+}
