@@ -257,6 +257,28 @@ def test_location_save_and_saved_stops(tmp_path):
     asyncio.run(run())
 
 
+def test_long_lead_alert_explains_yandex_horizon(tmp_path):
+    async def run():
+        db = Database(str(tmp_path / "l.sqlite3"))
+        await db.open()
+        sess = Stub()
+        feed, cb = _stop_dp(db, sess)
+        await feed(text="https://yandex.ru/maps/62/krasnoyarsk/stops/stop__4242/")
+        card = [c for c in sess.calls if isinstance(c, EditMessageText)][-1]
+        idx = next(i for i, (t, _) in enumerate(_buttons(card)) if t.startswith("Автобус 135"))
+        await cb(f"sr:{idx}")
+        leads = [d for _, d in _buttons([c for c in sess.calls if isinstance(c, EditMessageText)][-1])]
+        assert leads[-4:] == ["sl:20", "sl:25", "sl:30", "sl:40"]
+        await cb("sl:30")
+        await cb("sm:once")
+        done = [c for c in sess.calls if isinstance(c, EditMessageText)][-1].text
+        assert "✅ Оповещение О1" in done and "за 30 мин" in done and "раньше предупредить не получится" in done
+        assert [t.lead_min for t in await db.active_stop_triggers()] == [30]
+        await db.close()
+
+    asyncio.run(run())
+
+
 def test_bot_commands_menu():
     from busbot.handlers import bot_commands, help_text
     names = [c.command for c in bot_commands(False)]

@@ -40,6 +40,7 @@ class YandexConfig:
     allowed_hosts: tuple[str, ...] = YANDEX_HOSTS
     base_url: str = "https://yandex.ru"      # HTTP source: where stop/search pages are requested
     search_radius_m: float = 1500.0          # HTTP source: nearest stops farther than this are dropped
+    line_ttl_s: float = 86400.0              # HTTP source: route pages (stop order + path) are cached this long
 
 
 @dataclass
@@ -320,6 +321,9 @@ class YandexStopSource:
 
     def snapshot(self, stop_id: str) -> StopSnapshot | None:
         return self._snaps.get(stop_id)
+
+    async def line(self, rf, region: str | None) -> list:
+        raise ValueError("схемы маршрутов загружаются только при STOP_SOURCE=yandex")
 
     async def get(self, stop_id: str, url: str | None = None, max_age: float = 60.0) -> StopSnapshot:
         snap = self._snaps.get(stop_id)

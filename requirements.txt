@@ -4,3 +4,4 @@ httpx>=0.27
 python-dotenv>=1.0
 playwright==1.63.0
 pytest>=8
+aiohttp-socks>=0.9          # TELEGRAM_PROXY: aiogram needs it for any proxy

@@ -57,5 +57,8 @@ class MockStopSource:
     def snapshot(self, stop_id: str) -> StopSnapshot | None:
         return self._snap(stop_id) if stop_id in self._wanted else None
 
+    async def line(self, rf: RouteForecast, region: str | None) -> list:
+        raise ValueError("в mock-режиме схем маршрутов нет")
+
     def problem(self) -> str | None:
         return None

@@ -35,7 +35,7 @@ class Track(StatesGroup):
     mode = State()
 
 
-LEADS = [3, 5, 7, 10, 15]
+LEADS = [3, 5, 7, 10, 15, 20, 25, 30, 40]   # beyond ~15 min: estimates by upstream stops / KGT positions
 URL_RE = re.compile(r"https?://\S+")
 YANDEX_LINK_RE = re.compile(r"yandex\.\w+/maps|stop__\d+", re.I)
 
@@ -542,20 +542,53 @@ async def got_stop_lead(c: CallbackQuery, state: FSMContext):
     await c.answer()
 
 
+async def _long_lead_note(upstream, d: dict) -> str:
+    """How an alert beyond Yandex's horizon will work for this stop, or why it can't be that early."""
+    lead = d["lead"]
+    hor = round(upstream.cfg.horizon_min) if upstream is not None else 15
+    if lead <= hor:
+        return ""
+    if upstream is None or not upstream.long(lead):
+        return f"\n\n⚠️ Яндекс показывает автобус примерно за {hor} мин — раньше предупредить не получится."
+    p = await upstream.plan_for(d["stop_id"], d["route_key"], lead, d["stop_url"])
+    if p.error:
+        return (f"\n\n⚠️ Схема маршрута не загрузилась ({html.escape(p.error)}). Пока предупрежу, как только Яндекс "
+                f"покажет автобус (примерно за {hor} мин), и попробую ещё раз позже.")
+    ways = []
+    if p.anchors:
+        near = min(p.anchors, key=lambda a: a.dist_m)
+        n = len({a.stop_id for a in p.anchors})
+        ways.append(f"по {n} {'остановке' if n == 1 else 'остановкам'} выше по маршруту "
+                    f"(ближайшая — «{html.escape(near.name)}»)")
+    cover = p.cover_min
+    if upstream.positions is not None:
+        ways.append("по координатам автобусов КГТ")
+        cover = max(cover, p.route_min)
+    text = ""
+    if ways:
+        text = (f"\n\nℹ️ Яндекс показывает автобус примерно за {hor} мин, раньше — оценка "
+                f"{' и '.join(ways)}, точность ±3–5 мин.")
+    if cover < lead:
+        text += (f"\n⚠️ До начала маршрута мало остановок: скорее всего, предупрежу примерно "
+                 f"за {max(hor, int(cover))} мин, а не за {lead}.")
+    return text
+
+
 @router.callback_query(StopFlow.mode, F.data.startswith("sm:"))
-async def got_stop_mode(c: CallbackQuery, state: FSMContext, db: Database):
+async def got_stop_mode(c: CallbackQuery, state: FSMContext, db: Database, upstream=None):
     d = await state.get_data()
     await state.clear()
+    await c.answer()
     rec = c.data.endswith("rec")
     tid = await db.add_stop_trigger(c.message.chat.id, d["stop_id"], d["stop_url"], d["stop_name"],
                                     d["route_key"], d["route_title"], d["lead"], rec)
+    note = await _long_lead_note(upstream, d)
     b = InlineKeyboardBuilder()
     b.button(text="❌ Отключить", callback_data=f"sdel:{tid}")
     await c.message.edit_text(
         f"✅ Оповещение О{tid}\n🚏 {html.escape(d['stop_name'])}\n{html.escape(d['route_title'])}, "
-        f"за {d['lead']} мин\nРежим: {'постоянно' if rec else 'один раз'}\n\nТекущий прогноз: /now",
+        f"за {d['lead']} мин\nРежим: {'постоянно' if rec else 'один раз'}{note}\n\nТекущий прогноз: /now",
         reply_markup=b.as_markup())
-    await c.answer()
 
 
 @router.callback_query(F.data.startswith("sdel:"))
@@ -701,7 +734,7 @@ async def cb_saved_delete(c: CallbackQuery, db: Database):
 # ---------------- /now ----------------
 
 @router.message(Command("now"))
-async def cmd_now(m: Message, db: Database, stop_source, stop_matcher: StopMatcher):
+async def cmd_now(m: Message, db: Database, stop_source, stop_matcher: StopMatcher, upstream=None):
     ss = await db.user_stop_triggers(m.chat.id)
     if not ss:
         await m.answer("Нет оповещений по остановкам. /stop — создать, /stops — табло сохранённых остановок.")
@@ -721,9 +754,13 @@ async def cmd_now(m: Message, db: Database, stop_source, stop_matcher: StopMatch
         if snap is None:
             out.append(f"{head}\n   данных нет — Яндекс не ответил")
             continue
-        up = stop_matcher.upcoming(snap, t.route_key, now)
-        etas = ", ".join(_fmt_eta(e) + ("" if a.live else " (расп.)") for a, e in up[:3]) or "прогноза нет"
+        est = upstream.last.get(t.id, []) if upstream is not None else []
+        up = stop_matcher.upcoming(snap, t.route_key, now, est)
+        etas = ", ".join(("≈" if a.via else "") + _fmt_eta(e) + ("" if a.live else " (расп.)")
+                         for a, e in up[:3]) or "прогноза нет"
         out.append(f"{head}\n   {etas} · данные {int(now - snap.fetched_at)} с назад")
+    if any("≈" in x for x in out):
+        out.append("\n≈ — оценка по предыдущим остановкам или координатам автобуса")
     p = stop_source.problem()
     if p:
         out.append(f"\n⚠️ {html.escape(p)}")

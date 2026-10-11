@@ -45,6 +45,15 @@ CREATE TABLE IF NOT EXISTS saved_stops (
     created_at REAL NOT NULL,
     UNIQUE (chat_id, stop_id)
 );
+CREATE TABLE IF NOT EXISTS segment_times (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_stop TEXT NOT NULL,
+    to_stop TEXT NOT NULL,
+    dist_m REAL NOT NULL,
+    seconds REAL NOT NULL,
+    at REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_segment_times ON segment_times (at);
 """
 
 VCOLS = "id, chat_id, stop_id, stop_url, title, yandex_name, lat, lon"
@@ -166,3 +175,16 @@ class Database:
         cur = await self._c.execute("DELETE FROM saved_stops WHERE id = ? AND chat_id = ?", (saved_id, chat_id))
         await self._c.commit()
         return cur.rowcount > 0
+
+    # ---- observed travel times between stops (upstream estimates)
+    async def add_segment_time(self, from_stop: str, to_stop: str, dist_m: float, seconds: float, at: float) -> None:
+        await self._c.execute(
+            "INSERT INTO segment_times (from_stop, to_stop, dist_m, seconds, at) VALUES (?,?,?,?,?)",
+            (from_stop, to_stop, dist_m, seconds, at))
+        await self._c.commit()
+
+    async def segment_times(self, since: float) -> list[tuple[str, str, float, float, float]]:
+        """(from_stop, to_stop, dist_m, seconds, at) observed since `since`, oldest first."""
+        cur = await self._c.execute(
+            "SELECT from_stop, to_stop, dist_m, seconds, at FROM segment_times WHERE at >= ? ORDER BY at", (since,))
+        return [tuple(r) for r in await cur.fetchall()]

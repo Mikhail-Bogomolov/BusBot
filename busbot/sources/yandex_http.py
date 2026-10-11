@@ -5,6 +5,8 @@ The stop page (/maps/<region>/<city>/stops/stop__N/) is server-rendered: its HTM
 getStopInfo returns (the page's own getStopInfo XHR only fires ~30 s later, as a refresh).
 Nearest stops: the regular search page for «остановка» around a point; its state-view lists results
 with uri ymapsbm1://transit/stop?id=stop__N, title and coordinates.
+Route page (/maps/<region>/<city>/routes/<type>_<name>/<hex of the line uri>/): config.masstransitLine holds
+every thread's stops in order + the path; it changes rarely and is cached for line_ttl_s.
 Only ordinary page loads are made. Captcha / HTTP 403/429 pauses the source; it is never solved or bypassed.
 """
 import asyncio
@@ -19,8 +21,9 @@ from urllib.parse import quote, urlparse
 import httpx
 
 from ..geo import bearing_deg, haversine_m
+from ..models import norm_route
 from ..stop_engine import SourceBlocked
-from ..stopinfo import NearStop, StopSnapshot, parse_stop_info
+from ..stopinfo import LineThread, NearStop, RouteForecast, StopSnapshot, parse_line, parse_stop_info
 from .yandex import BLOCK_STATUSES, YandexConfig, check_url, is_captcha
 
 log = logging.getLogger("yandex_http")
@@ -87,6 +90,8 @@ class YandexHttpSource:
         self._blocked_until = 0.0
         self._problem: str | None = None
         self._gate = asyncio.Semaphore(2)          # never more than 2 requests to Yandex at once
+        self._lines: dict[str, tuple[float, list[LineThread]]] = {}
+        self._line_err: dict[str, tuple[float, str]] = {}   # failed route pages are not retried for 10 min
 
     # ---------- lifecycle
     async def start(self) -> None:
@@ -199,6 +204,37 @@ class YandexHttpSource:
                for sid, (title, slat, slon) in found.items()]
         res = sorted((s for s in res if s.dist_m <= self.cfg.search_radius_m), key=lambda s: s.dist_m)
         return res[:limit]
+
+    async def line(self, rf: RouteForecast, region: str | None) -> list[LineThread]:
+        """All threads (directions) of a route, from its route page. Cached for line_ttl_s."""
+        key = rf.line_id or rf.uri
+        if not key or not region:
+            raise ValueError("Яндекс не сообщил id маршрута или город")
+        now = self.clock()
+        hit = self._lines.get(key)
+        if hit is not None and now - hit[0] < self.cfg.line_ttl_s:
+            return hit[1]
+        err = self._line_err.get(key)
+        if err is not None and now - err[0] < 600:
+            raise ValueError(err[1])
+        uri = rf.uri or f"ymapsbm1://transit/line?id={rf.line_id}"
+        slug = quote(f"{rf.type or 'bus'}_{rf.seoname or norm_route(rf.name)}", safe="")
+        url = f"{self.cfg.base_url}/maps/{quote(region)}/routes/{slug}/{uri.encode().hex()}/"
+        try:
+            state = await self._get(url)
+            cfg = state.get("config")
+            ml = cfg.get("masstransitLine") if isinstance(cfg, dict) else None
+            if not isinstance(ml, dict):
+                raise ValueError("на странице маршрута нет схемы (masstransitLine)")
+            threads = parse_line(ml)
+            if not threads:
+                raise ValueError(f"схема маршрута не распознана; сырой ответ: {self._dump('line_' + key, ml)}")
+        except ValueError as e:
+            self._line_err[key] = (now, str(e))
+            raise
+        self._lines[key] = (now, threads)
+        self._line_err.pop(key, None)
+        return threads
 
     # ---------- continuous watching (StopEngine)
     async def sync(self, wanted: dict[str, str]) -> None:

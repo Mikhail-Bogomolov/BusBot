@@ -17,7 +17,8 @@ from busbot.stop_engine import SourceBlocked
 FIX = Path(__file__).parent / "fixtures"
 STOP = json.loads((FIX / "getStopInfo_2026_krsk.json").read_text(encoding="utf-8"))["data"]
 SEARCH = json.loads((FIX / "search_stops_krsk.json").read_text(encoding="utf-8"))
-HITS = {"stop": 0}
+LINE = json.loads((FIX / "line_page_krsk.json").read_text(encoding="utf-8"))   # route page state-view, bus 3
+HITS = {"stop": 0, "routes": 0}
 
 
 def page(state: dict) -> str:
@@ -59,6 +60,14 @@ class H(BaseHTTPRequestHandler):
         if u.path == "/maps/" and q.get("masstransit[stopId]") == [STOP["id"]] or u.path.endswith(f"/stops/{STOP['id']}/"):
             HITS["stop"] += 1
             return self._send(200, page({"config": {"masstransitStop": STOP}}))
+        if "/routes/" in u.path:
+            HITS["routes"] += 1
+            *_, slug, hexuri, _ = u.path.split("/")
+            uri = bytes.fromhex(hexuri).decode()
+            if u.path.startswith("/maps/62/krasnoyarsk/routes/") and slug == "bus_3" and "line?id=2611970554&" in uri:
+                return self._send(200, page(LINE))
+            if slug == "bus_38":
+                return self._send(200, page({"config": {}, "stack": []}))
         return self._send(404, "nf")
 
 
@@ -149,6 +158,37 @@ def test_errors_and_blocking(server, tmp_path):
             with pytest.raises(SourceBlocked):
                 await src.resolve(server + "/maps/forbidden/")
             assert "403" in src.problem()
+        finally:
+            await src._client.aclose()
+
+    asyncio.run(run())
+
+
+def test_route_page_cached_and_errors_not_hammered(server, tmp_path):
+    async def run():
+        t = [1000.0]
+        src = make(server, tmp_path, clock=lambda: t[0])
+        await src.start()
+        try:
+            snap = await src.get(STOP["id"])
+            n = HITS["routes"]
+            ths = await src.line(snap.routes["3|bus"], snap.region)       # uri hex-encoded in the URL
+            assert {th.thread_id for th in ths} == {"5189668206", "5189728876"} and HITS["routes"] == n + 1
+            await src.line(snap.routes["3|bus"], snap.region)
+            assert HITS["routes"] == n + 1                                 # cached
+            t[0] += 86401
+            await src.line(snap.routes["3|bus"], snap.region)
+            assert HITS["routes"] == n + 2                                 # expired after line_ttl_s
+            with pytest.raises(ValueError, match="нет схемы"):
+                await src.line(snap.routes["38|bus"], snap.region)
+            with pytest.raises(ValueError, match="HTTP 404"):
+                await src.line(snap.routes["63|bus"], snap.region)
+            with pytest.raises(ValueError, match="HTTP 404"):
+                await src.line(snap.routes["63|bus"], snap.region)       # failure remembered: no new request
+            assert HITS["routes"] == n + 4
+            with pytest.raises(ValueError, match="город"):
+                await src.line(snap.routes["3|bus"], None)
+            assert src.problem() is None                                   # route pages don't flag the source
         finally:
             await src._client.aclose()
 

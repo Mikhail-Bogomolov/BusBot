@@ -1,13 +1,26 @@
 services:
+  # Telegram is blocked from the server: only the bot's Telegram traffic goes through Xray with a key from Happ.
+  # The server itself stays without VPN, Yandex goes direct. Config: python -m busbot.tgproxy "<ключ>" (README).
+  tg-proxy:
+    image: ghcr.io/xtls/xray-core:26.9.30
+    restart: unless-stopped
+    command: ["run", "-c", "/etc/busbot-xray/config.json"]
+    volumes:
+      - ./xray:/etc/busbot-xray:ro
+    # no ports: SOCKS5 without auth, reachable only by the bot inside the compose network
+
   bot:
     build: .
     restart: unless-stopped
     init: true            # reaps Chromium child processes
     shm_size: "1gb"       # Chromium crashes with Docker's default 64 MB /dev/shm
+    depends_on: [tg-proxy]
     env_file: .env
     environment:
       DB_PATH: /data/bot.sqlite3
       YANDEX_PROFILE_DIR: /data/chromium
       YANDEX_DUMP_DIR: /data/yandex_dump
+      TELEGRAM_PROXY: socks5://tg-proxy:1080
     volumes:
       - ./data:/data
+      - ./xray:/app/xray  # so `docker compose run --rm bot python -m busbot.tgproxy` writes the config on the host

@@ -6,11 +6,13 @@ Known formats:
   2026:  data.transports[].threads[].BriefSchedule.{Events[], Frequencies[]}; data.currentTime (ms),
          data.coordinates [lon, lat]  (verified on a live Krasnoyarsk response)
 Keys are matched case-insensitively; timestamps may be int/str, seconds/milliseconds.
+Route page (parse_line): masstransitLine.features[] = threads, each with ordered stops and path segments.
 """
 import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from .geo import haversine_m
 from .models import norm_route
 
 STOP_ID_RE = re.compile(r"stop__\d+")
@@ -23,6 +25,8 @@ class Arrival:
     ts: float                 # unix seconds (server clock)
     live: bool                # True = GPS estimate, False = timetable
     vehicle_id: str | None
+    thread_id: str | None = None
+    via: str | None = None    # set on estimates beyond Yandex's horizon: what the estimate is based on
 
 
 @dataclass(slots=True)
@@ -33,6 +37,9 @@ class RouteForecast:
     arrivals: list[Arrival] = field(default_factory=list)
     frequency: str | None = None
     line_id: str | None = None
+    uri: str | None = None            # ymapsbm1://transit/line?id=... (identifies the route page)
+    seoname: str | None = None
+    thread_ids: list[str] = field(default_factory=list)   # directions of this route serving the stop
 
     @property
     def title(self) -> str:
@@ -48,6 +55,7 @@ class StopSnapshot:
     routes: dict[str, RouteForecast] = field(default_factory=dict)
     lat: float | None = None
     lon: float | None = None
+    region: str | None = None  # "62/krasnoyarsk", the city part of Yandex Maps URLs
 
     def now_server(self, now_local: float) -> float:
         base = self.server_time if self.server_time is not None else self.fetched_at
@@ -65,6 +73,30 @@ class NearStop:
     lon: float
     dist_m: float
     bearing: float            # from the user's point to the stop, degrees
+
+
+@dataclass(slots=True, frozen=True)
+class LineStop:
+    stop_id: str
+    name: str
+    lat: float
+    lon: float
+    at_m: float               # distance from the thread start along its path
+
+
+@dataclass(slots=True)
+class LineThread:
+    """One direction of a route: stops in travel order + the path as (lat, lon, at_m) points."""
+    thread_id: str
+    line_id: str | None
+    name: str
+    stops: list[LineStop] = field(default_factory=list)
+    path: list[tuple[float, float, float]] = field(default_factory=list)
+
+    def index(self, stop_id: str) -> int | None:
+        """Last position of the stop (a loop thread can start and end at it)."""
+        idx = [i for i, s in enumerate(self.stops) if s.stop_id == stop_id]
+        return idx[-1] if idx else None
 
 
 def route_key(name: str, type_: str) -> str:
@@ -120,7 +152,7 @@ def _ts(x: Any) -> float | None:
     return v if v > 1e9 else None
 
 
-def _events(brief: Any) -> tuple[list[Arrival], str | None]:
+def _events(brief: Any, thread_id: str | None = None) -> tuple[list[Arrival], str | None]:
     out: list[Arrival] = []
     if not isinstance(brief, dict):
         return out, None
@@ -130,9 +162,9 @@ def _events(brief: Any) -> tuple[list[Arrival], str | None]:
         est, sch = _ts(_ci(e, "Estimated")), _ts(_ci(e, "Scheduled"))
         vid = _ci(e, "vehicleId")
         if est is not None:
-            out.append(Arrival(est, True, str(vid) if vid else None))
+            out.append(Arrival(est, True, str(vid) if vid else None, thread_id))
         elif sch is not None:
-            out.append(Arrival(sch, False, str(vid) if vid else None))
+            out.append(Arrival(sch, False, str(vid) if vid else None, thread_id))
     freq = _ci(brief, "Frequency", "Frequencies")
     if isinstance(freq, list):
         freq = next((f for f in freq if isinstance(f, dict)), None)
@@ -157,6 +189,10 @@ def _container(obj: Any, depth: int = 0) -> dict | None:
             if r is not None:
                 return r
     return None
+
+
+def _str(x: Any) -> str | None:
+    return str(x) if x not in (None, "") else None
 
 
 def parse_stop_info(payload: Any, fetched_at: float) -> StopSnapshot:
@@ -185,18 +221,28 @@ def parse_stop_info(payload: Any, fetched_at: float) -> StopSnapshot:
             snap.lon, snap.lat = float(coords[0]), float(coords[1])
         except (TypeError, ValueError):
             pass
+    reg = _ci(meta, "region")
+    if isinstance(reg, dict) and _ci(reg, "id") and _ci(reg, "seoname"):
+        snap.region = f"{_ci(reg, 'id')}/{_ci(reg, 'seoname')}"
     for t in transports:
         if not isinstance(t, dict) or not _ci(t, "name"):
             continue
         name, type_ = str(_ci(t, "name")), str(_ci(t, "type") or "")
         key = route_key(name, type_)
         rf = snap.routes.get(key) or RouteForecast(key, name, type_)
-        rf.line_id = rf.line_id or (str(_ci(t, "lineId")) if _ci(t, "lineId") else None)
-        briefs = [_ci(t, "BriefSchedule")] + [_ci(th, "BriefSchedule") for th in (_ci(t, "threads") or [])
-                                              if isinstance(th, dict)]
+        rf.line_id = rf.line_id or _str(_ci(t, "lineId"))
+        rf.uri = rf.uri or _str(_ci(t, "uri"))
+        rf.seoname = rf.seoname or _str(_ci(t, "seoname"))
+        threads = [th for th in (_ci(t, "threads") or []) if isinstance(th, dict)]
+        briefs = [(_ci(t, "BriefSchedule"), None)]
+        for th in threads:
+            tid = _str(_ci(th, "threadId"))
+            if tid and tid not in rf.thread_ids:
+                rf.thread_ids.append(tid)
+            briefs.append((_ci(th, "BriefSchedule"), tid))
         seen = {(a.ts, a.vehicle_id) for a in rf.arrivals}
-        for b in briefs:
-            evs, freq = _events(b)
+        for b, tid in briefs:
+            evs, freq = _events(b, tid)
             rf.frequency = rf.frequency or freq
             for a in evs:
                 if (a.ts, a.vehicle_id) not in seen:
@@ -205,3 +251,55 @@ def parse_stop_info(payload: Any, fetched_at: float) -> StopSnapshot:
         rf.arrivals.sort(key=lambda a: a.ts)
         snap.routes[key] = rf
     return snap
+
+
+def parse_line(payload: Any) -> list[LineThread]:
+    """Threads of a route from the route page's masstransitLine (or anything containing it).
+    Each thread's features[] alternate stops {id, name, coordinates [lon, lat]} and segments {points: [[lon, lat]]};
+    a segment runs from the stop before it to the stop after it."""
+    root = _find(payload, "masstransitLine") if isinstance(payload, dict) else None
+    root = root if isinstance(root, dict) else payload
+    out: list[LineThread] = []
+    for th in _ci(root, "features") or []:
+        md = _ci(_ci(th, "properties"), "ThreadMetaData")
+        feats = _ci(th, "features")
+        if not isinstance(md, dict) or not _ci(md, "id") or not isinstance(feats, list):
+            continue
+        lt = LineThread(str(_ci(md, "id")), _str(_ci(md, "lineId")), str(_ci(md, "name") or ""))
+        at, last = 0.0, None
+        seg_since_stop = False
+
+        def step(lat: float, lon: float) -> None:
+            nonlocal at, last
+            if last is not None:
+                at += haversine_m(last[0], last[1], lat, lon)
+            if (lat, lon) != last:
+                lt.path.append((lat, lon, at))
+            last = (lat, lon)
+
+        for f in feats:
+            if not isinstance(f, dict):
+                continue
+            pts = _ci(f, "points")
+            if isinstance(pts, list):
+                for p in pts:
+                    try:
+                        step(float(p[1]), float(p[0]))
+                    except (TypeError, ValueError, IndexError):
+                        pass
+                seg_since_stop = True
+                continue
+            c = _ci(f, "coordinates")
+            if not _ci(f, "id") or not (isinstance(c, list) and len(c) == 2):
+                continue
+            try:
+                lat, lon = float(c[1]), float(c[0])
+            except (TypeError, ValueError):
+                continue
+            if not seg_since_stop:
+                step(lat, lon)   # no geometry since the previous stop: straight line
+            seg_since_stop = False
+            lt.stops.append(LineStop(str(_ci(f, "id")), str(_ci(f, "name") or ""), lat, lon, at))
+        if len(lt.stops) >= 2:
+            out.append(lt)
+    return out

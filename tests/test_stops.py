@@ -60,7 +60,9 @@ def test_parse_2026_live_krasnoyarsk():
     assert set(snap.routes) == {"63|bus", "3|bus", "38|bus", "83|bus", "2|bus", "6|trolleybus"}
     b3 = snap.routes["3|bus"]
     assert b3.line_id == "2611970554" and b3.frequency == "11 мин"
-    assert b3.arrivals == [Arrival(1791185336.0, True, "MKUKGT|116741330756")]
+    assert b3.arrivals == [Arrival(1791185336.0, True, "MKUKGT|116741330756", "5189728876")]
+    assert b3.thread_ids == ["5189728876"] and b3.seoname == "3"
+    assert b3.uri.startswith("ymapsbm1://transit/line?id=2611970554&") and snap.region == "62/krasnoyarsk"
     assert snap.eta_min(b3.arrivals[0], 0.0) == pytest.approx(1.9, abs=0.05)       # by server clock
     assert snap.routes["63|bus"].arrivals == [] and snap.routes["63|bus"].frequency == "16 мин"
     t6 = snap.routes["6|trolleybus"]                                               # 3 threads merged

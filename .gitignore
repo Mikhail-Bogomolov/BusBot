@@ -4,6 +4,9 @@
 # runtime data: SQLite, Chromium profile, Yandex dumps
 data/
 
+# Xray config for tg-proxy: contains the VPN key
+xray/
+
 # Python
 __pycache__/
 *.py[cod]
